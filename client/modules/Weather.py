@@ -106,6 +106,7 @@ def handle(text, mic, profile):
     forecast = None
     if 'wmo_id' in profile:
         forecast = get_forecast_by_wmo_id(str(profile['wmo_id']))
+    
     elif 'location' in profile:
         forecast = get_forecast_by_name(str(profile['location']))
 
