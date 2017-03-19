@@ -3,7 +3,6 @@ import sys
 import datetime
 import re
 import gflags
-from Alarm import Alarm_Clock
 import time
 
 from client.app_utils import getTimezone
@@ -207,8 +206,6 @@ def getEventsTomorrow(profile, mic):
 
 flow = OAuth2WebServerFlow(client_id, client_secret, scope)
 
-alarm = None #Alarm global object
-
 # Create a Storage object. This object holds the credentials that your
 # application needs to authorize access to the user's data. The name of the
 # credentials file is provided. If the file does not exist, it is
@@ -263,10 +260,13 @@ def isValid(text):
 	return bool(re.search(r'\bCalendar\b', text, re.IGNORECASE))
 
 def timeWakeUp(profile, mic):
-        '''says the time to wake up. Potentially make it set the alarm too.'''
-        global alarm
+        '''Returns (maybe says) the time to wake up.'''
         one_day = datetime.timedelta(days=1)
-        tz = getTimezone(profile)
+        try:
+              tz = getTimezone(profile)
+        
+        except:
+                None
         
         #If it isnt before 5am check tomorrow, otherwise check later today
         if datetime.datetime.now().time().hour > 5:
@@ -285,7 +285,8 @@ def timeWakeUp(profile, mic):
                 events = service.events().list(calendarId='primary', pageToken=page_token, timeMin=tomorrowStartTime, timeMax=tomorrowEndTime).execute()
                 if(len(events['items']) == 0):
                         mic.say("You have no events scheduled Tomorrow, so get up whenever you like!")
-                        return
+                        return False
+
                 event = events['items'][0] #first event of the day
 
                 try:
@@ -300,11 +301,7 @@ def timeWakeUp(profile, mic):
                         startHour = str(startHour)
                         
                         mic.say("You need to be up for " + startHour + ":" + startMinute + " for " + eventTitle)
-                        print eventRawStartTime0
-                        dt = datetime.datetime.strptime(eventRawStartTime0, "%Y-%m-%dT%H:%M:%SZ")
-                        alarm = Alarm_Clock(time.mktime(dt.timetuple()))
-                        alarm.start()
-                        mic.say("I've set your alarm.")
+                        return eventRawStartTime0
  
                 except KeyError, e:
                         mic.say("I got an error fetching data from the calander. Sorry Toby.")
