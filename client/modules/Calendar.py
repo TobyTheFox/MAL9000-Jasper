@@ -97,8 +97,8 @@ def getEventsToday(profile, mic):
 	print(str(utcString))	
 	m = re.search('((\+|\-)[0-9]{2}\:[0-9]{2})', str(utcString))
 	utcString = str(m.group(0))
-	todayStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00" + utcString
-	todayEndTime = str(d.strftime("%Y-%m-%d")) + "T23:59:59" + utcString
+	todayStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00Z"
+	todayEndTime = str(d.strftime("%Y-%m-%d")) + "T23:59:59Z"
 	page_token = None
 	
 	while True:
@@ -154,8 +154,8 @@ def getEventsTomorrow(profile, mic):
 	print(str(utcString))
 	#in form 2017-03-15T02:15:35.836202
 	utcString = m.group(0)
-	tomorrowStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00" + utcString
-	tomorrowEndTime = str(d.strftime("%Y-%m-%d")) + "T23:59:59" + utcString
+	tomorrowStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00Z"
+	tomorrowEndTime = str(d.strftime("%Y-%m-%d")) + "T23:59:59Z"
 
 	page_token = None
 
@@ -243,6 +243,7 @@ http = credentials.authorize(http)
 service = build('calendar', 'v3', http=http)
 
 def handle(text, mic, profile):
+        print(text)
 	if bool(re.search('Add', text, re.IGNORECASE)):
 		addEvent(profile,mic)
 
@@ -252,6 +253,67 @@ def handle(text, mic, profile):
 	if bool(re.search('Tomorrow', text, re.IGNORECASE)):
 		getEventsTomorrow(profile,mic)
 
+        if bool(re.search('Wake', text, re.IGNORECASE)) or  bool(re.search('Up', text, re.IGNORECASE)) or bool(re.search('Get', text, re.IGNORECASE)):
+                timeWakeUp(profile,mic)
 
 def isValid(text):
 	return bool(re.search(r'\bCalendar\b', text, re.IGNORECASE))
+
+def timeWakeUp(profile, mic):
+        '''says the time to wake up. Potentially make it set the alarm too.'''
+        one_day = datetime.timedelta(days=1)
+        tz = getTimezone(profile)
+        
+        #If it isnt before 5am check tomorrow, otherwise check later today
+        if datetime.datetime.now().time().hour > 5:
+                d = datetime.datetime.now(tz=tz) + one_day
+        else:
+                d = datetime.datetime.now(tz=tz)
+
+        utcString = d.isoformat()
+        m = re.search('([0-9]{2}\:[0-9]{2})', str(utcString))
+        utcString = m.group(0)
+        tomorrowStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00Z"
+        tomorrowEndTime = str(d.strftime("%Y-%m-%d")) + "T23:59:59Z"
+        page_token = None
+
+        while True:
+                # Gets events from primary calender from each page in tomorrow day boundaries
+
+                events = service.events().list(calendarId='primary', pageToken=page_token, timeMin=tomorrowStartTime, timeMax=tomorrowEndTime).execute()
+                if(len(events['items']) == 0):
+                        mic.say("You have no events scheduled Tomorrow, so get up whenever you like!")
+                        return
+                print events
+                event = events['items'][0] #first event of the day
+
+                try:
+                        eventTitle = event['summary']
+                        eventTitle = str(eventTitle)
+                        eventRawStartTime = event['start']
+                        eventRawStartTime = eventRawStartTime['dateTime'].split("T")
+                        temp = eventRawStartTime[1]
+                        startHour, startMinute, temp = temp.split(":", 2)
+                        startHour = int(startHour)
+                        appendingTime = "am"
+
+                        if ((startHour - 12) > 0 ):
+                                startHour = startHour - 12
+                                appendingTime = "pm"
+
+                        startMinute = str(startMinute)
+                        startHour = str(startHour)
+                        
+                        mic.say("You need to be up for " + startHour + ":" + startMinute + " " + appendingTime + " for " + eventTitle)
+                        #SET ALARM HERE...
+
+                except KeyError, e:
+                        mic.say("I got an error fetching data from the calander. Sorry Toby.")
+
+                page_token = events.get('nextPageToken')
+
+                if not page_token:
+                        return
+
+
+

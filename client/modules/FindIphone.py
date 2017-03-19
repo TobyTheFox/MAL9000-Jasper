@@ -77,16 +77,19 @@ def handle(text, mic, profile):
 
     # Many iphones
     elif len(iphones) > 1:
-        mic.say("There are multiple iphones on your account.")
+        #mic.say("There are multiple iphones on your account.")
+        count = 0
         for phone in iphones:
-            print(phone.status()['name'].replace(u"’","'"))
-            mic.say("Did you mean the {type} named {name}?".format(type=phone.status()['deviceDisplayName'], name=(phone.status()['name'].replace("’".decode('utf-8'),"'"))))
-            
-            #ABOVE LINE ADDED BECAUSE IT MESSED UP WITH THE APOSTROPHE IN TOBY'S IPHONE - Toby
-            command = mic.activeListen()
-            if any(aff in command for aff in AFFIRMATIVE):
-                phone_to_ring = phone
-                break
+            #WILL ALWAYS SELECT THE SECOND IPHONE AS THAT IS MINE
+            count += 1
+            if count != 2:
+                continue #my iphone is second in list, so i removed the first
+            #print(phone.status()['name'].replace(u"’","'"))
+            #mic.say("Did you mean the {type} named {name}?".format(type=phone.status()['deviceDisplayName'], name=(phone.status()['name'].replace("’".decode('utf-8'),"'"))))
+            #command = mic.activeListen()
+            #if any(aff in command for aff in AFFIRMATIVE):
+            phone_to_ring = phone
+            break
 
     # Just one
     elif len(iphones) == 1:
@@ -96,9 +99,8 @@ def handle(text, mic, profile):
         mic.say("You didn't select an iPhone")
         return
 
-    mic.say("Sending ring command to the phone now")
     phone_to_ring.play_sound()
-
+    mic.say("Sending ring command to the phone now")
 
 def isValid(text):
     """
