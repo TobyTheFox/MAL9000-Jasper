@@ -45,9 +45,10 @@ class Alarm_Clock:
                 '''Cancels the alarm'''
                 if self.alarm_set:
                         self.p.terminate()
-                        self.alarm_set = False 
+                        self.alarm_set = False
+                        mic.say("I have stopped your alarm, Toby")
                 else:
-                        mic.say("I'm sorry Toby, you have no alarm to stop.")
+                        mic.say("I'm sorry, Toby. I'm afraid I can't do that. You have no alarm to stop.")
                 return
 
 WORDS = ["Alarm"]
@@ -55,13 +56,16 @@ WORDS = ["Alarm"]
 alarm = None
 
 def handle(text, mic, profile):
+        global alarm
         if bool(re.search('Set', text, re.IGNORECASE)):
                 alarm = Alarm_Clock()
                 alarm.set_alarm(profile, mic)
                 alarm.start(profile, mic)
         
         if bool(re.search('Stop', text, re.IGNORECASE)):
-                alarm.stop(profile, mic)
-
+                try:
+                        alarm.stop(profile, mic)
+                except:
+                        mic.say("I'm sorry, Toby. I'm afraid I can't do that. You have no alarm to stop.")
 def isValid(text):
     return bool(re.search(r'alarm', text, re.IGNORECASE))
