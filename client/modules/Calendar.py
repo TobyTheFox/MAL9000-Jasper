@@ -3,6 +3,8 @@ import sys
 import datetime
 import re
 import gflags
+from Alarm import Alarm_Clock
+import time
 
 from client.app_utils import getTimezone
 from dateutil import tz
@@ -13,10 +15,10 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import *
 
 
-# Written by Marc Poul Joseph Laventure
+# Written by Marc Poul Joseph Laventure and Tobias Enefey Fox
 
 FLAGS = gflags.FLAGS
-WORDS = [ "Calendar", "Events", "Check", "My" ]
+WORDS = [ "Calendar", "Events", "Wake"]
 client_id = '290720744540-oarqq5pmmfb606fd2f7de9497foboulf.apps.googleusercontent.com'
 client_secret = 'DpvpqLa7MPPScGRNvnkzC5jC'
 
@@ -205,6 +207,7 @@ def getEventsTomorrow(profile, mic):
 
 flow = OAuth2WebServerFlow(client_id, client_secret, scope)
 
+alarm = None #Alarm global object
 
 # Create a Storage object. This object holds the credentials that your
 # application needs to authorize access to the user's data. The name of the
@@ -261,6 +264,7 @@ def isValid(text):
 
 def timeWakeUp(profile, mic):
         '''says the time to wake up. Potentially make it set the alarm too.'''
+        global alarm
         one_day = datetime.timedelta(days=1)
         tz = getTimezone(profile)
         
@@ -278,35 +282,30 @@ def timeWakeUp(profile, mic):
         page_token = None
 
         while True:
-                # Gets events from primary calender from each page in tomorrow day boundaries
-
                 events = service.events().list(calendarId='primary', pageToken=page_token, timeMin=tomorrowStartTime, timeMax=tomorrowEndTime).execute()
                 if(len(events['items']) == 0):
                         mic.say("You have no events scheduled Tomorrow, so get up whenever you like!")
                         return
-                print events
                 event = events['items'][0] #first event of the day
 
                 try:
                         eventTitle = event['summary']
                         eventTitle = str(eventTitle)
-                        eventRawStartTime = event['start']
-                        eventRawStartTime = eventRawStartTime['dateTime'].split("T")
+                        eventRawStartTime0 = event['start']['dateTime']
+                        eventRawStartTime = eventRawStartTime0.split("T")
                         temp = eventRawStartTime[1]
                         startHour, startMinute, temp = temp.split(":", 2)
                         startHour = int(startHour)
-                        appendingTime = "am"
-
-                        if ((startHour - 12) > 0 ):
-                                startHour = startHour - 12
-                                appendingTime = "pm"
-
                         startMinute = str(startMinute)
                         startHour = str(startHour)
                         
-                        mic.say("You need to be up for " + startHour + ":" + startMinute + " " + appendingTime + " for " + eventTitle)
-                        #SET ALARM HERE...
-
+                        mic.say("You need to be up for " + startHour + ":" + startMinute + " for " + eventTitle)
+                        print eventRawStartTime0
+                        dt = datetime.datetime.strptime(eventRawStartTime0, "%Y-%m-%dT%H:%M:%SZ")
+                        alarm = Alarm_Clock(time.mktime(dt.timetuple()))
+                        alarm.start()
+                        mic.say("I've set your alarm.")
+ 
                 except KeyError, e:
                         mic.say("I got an error fetching data from the calander. Sorry Toby.")
 
@@ -314,6 +313,3 @@ def timeWakeUp(profile, mic):
 
                 if not page_token:
                         return
-
-
-
