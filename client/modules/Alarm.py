@@ -3,22 +3,28 @@ import multiprocessing
 import Calendar
 import re
 import datetime
+import os
 
 class Alarm_Clock:
         alarm_time = None #In UTC time form like 1489890471.866293
         alarm_set = False
+        alarm_going_off = False
         p = None
 
         def __init__(self):
+                return
+
+        def alarm_go_off(self, station_id):
+                #TODO: Make it create new process in new terminal with radio
+                self.alarm_going_off = True
+                os.system("pyradio --play "+str(station_id))
                 return
 
         def checkTime(self):
                 '''If alarm time - current time is less than 0 sound the alarm!'''
                 while(True):
                         if self.alarm_time - time.time() <= 0:
-                                print "THE ALRAM IS GOING OFF"
-                                for i in range(1):
-                                        print "BEEP"
+                                self.alarm_go_off(15) #station id
                                 return(True)
                         else:
                                 #print(self.alarm_time-time.time())
@@ -46,7 +52,13 @@ class Alarm_Clock:
                 if self.alarm_set:
                         self.p.terminate()
                         self.alarm_set = False
-                        mic.say("I have stopped your alarm, Toby")
+                        if self.alarm_going_off:
+                                #TODO: Make it close the new process
+                                os.system("q")
+                                os.system(" ")
+                                self.alarm_going_off = False
+                        else:
+                                mic.say("I have stopped your alarm, Toby")
                 else:
                         mic.say("I'm sorry, Toby. I'm afraid I can't do that. You have no alarm to stop.")
                 return

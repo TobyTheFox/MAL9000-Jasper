@@ -95,9 +95,7 @@ def getEventsToday(profile, mic):
 	# Get Present Start Time and End Time in RFC3339 Format
 	d = datetime.datetime.now(tz=tz)
 	utcString = d.isoformat()
-	print(str(utcString))	
 	m = re.search('((\+|\-)[0-9]{2}\:[0-9]{2})', str(utcString))
-	utcString = str(m.group(0))
 	todayStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00Z"
 	todayEndTime = str(d.strftime("%Y-%m-%d")) + "T23:59:59Z"
 	page_token = None
@@ -152,7 +150,6 @@ def getEventsTomorrow(profile, mic):
 	d = datetime.datetime.now(tz=tz) + one_day
 	utcString = d.isoformat()
 	m = re.search('([0-9]{2}\:[0-9]{2})', str(utcString))
-	print(str(utcString))
 	#in form 2017-03-15T02:15:35.836202
 	utcString = m.group(0)
 	tomorrowStartTime = str(d.strftime("%Y-%m-%d")) + "T00:00:00Z"
