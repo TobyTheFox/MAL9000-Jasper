@@ -266,7 +266,7 @@ def timeWakeUp(profile, mic):
                 None
         
         #If it isnt before 5am check tomorrow, otherwise check later today
-        if datetime.datetime.now().time().hour > 5:
+        if datetime.datetime.now().time().hour > 7:
                 d = datetime.datetime.now(tz=tz) + one_day
         else:
                 d = datetime.datetime.now(tz=tz)

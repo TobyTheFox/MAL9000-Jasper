@@ -15,7 +15,6 @@ class Alarm_Clock:
                 return
 
         def alarm_go_off(self, station_id):
-                #TODO: Make it create new process in new terminal with radio
                 self.alarm_going_off = True
                 os.system("pyradio --play "+str(station_id))
                 return
@@ -27,14 +26,17 @@ class Alarm_Clock:
                                 self.alarm_go_off(15) #station id
                                 return(True)
                         else:
-                                #print(self.alarm_time-time.time())
                                 time.sleep(20)
 
         def set_alarm(self, profile, mic):
-                wake_up_dt = datetime.datetime.strptime(Calendar.timeWakeUp(profile, mic), "%Y-%m-%dT%H:%M:%SZ")
-                self.alarm_time = time.mktime(wake_up_dt.timetuple())
-                mic.say("I have set your alarm") 
-                return
+                try:
+                        #TODO: Change to start 1 hour before the event
+                        wake_up_dt = datetime.datetime.strptime(Calendar.timeWakeUp(profile, mic), "%Y-%m-%dT%H:%M:%SZ")
+                        self.alarm_time = time.mktime(wake_up_dt.timetuple())
+                        mic.say("I have set your alarm") 
+                        return
+                except:
+                        return
  
         def start(self, profile, mic):
                 '''Starts thread that checks if alarm is to go off or not'''
@@ -52,10 +54,9 @@ class Alarm_Clock:
                 if self.alarm_set:
                         self.p.terminate()
                         self.alarm_set = False
+                        os.system("pkill mplayer")
+                        os.system("pkill pyradio")
                         if self.alarm_going_off:
-                                #TODO: Make it close the new process
-                                os.system("q")
-                                os.system(" ")
                                 self.alarm_going_off = False
                         else:
                                 mic.say("I have stopped your alarm, Toby")
