@@ -2,9 +2,14 @@
 import logging
 from notifier import Notifier
 from brain import Brain
-
+import RPi.GPIO as GPIO
+import sys
+import os
 
 class Conversation(object):
+    def reset_pressed(self, input_pin):
+        self.mic.say("Toby, I'm scared.")
+        os.execl(sys.executable, sys.executable, *sys.argv)
 
     def __init__(self, persona, mic, profile):
         self._logger = logging.getLogger(__name__)
@@ -13,6 +18,10 @@ class Conversation(object):
         self.profile = profile
         self.brain = Brain(mic, profile)
         self.notifier = Notifier(profile)
+        
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(5, GPIO.BOTH, callback=self.reset_pressed)
 
     def handleForever(self):
         """

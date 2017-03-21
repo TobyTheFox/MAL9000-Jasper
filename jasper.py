@@ -124,8 +124,8 @@ class Jasper(object):
 if __name__ == "__main__":
 
     print("*******************************************************")
-    print("*             JASPER - THE TALKING COMPUTER           *")
-    print("* (c) 2015 Shubhro Saha, Charlie Marsh & Jan Holthuis *")
+    print("*                    MAL 9000 SERIES                  *")
+    print("* (c) 2017 S. Saha, C. Marsh, J. Holthuis, and T. Fox *")
     print("*******************************************************")
 
     logging.basicConfig()
