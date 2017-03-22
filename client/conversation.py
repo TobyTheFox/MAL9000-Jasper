@@ -7,8 +7,18 @@ import sys
 import os
 
 class Conversation(object):
+    def off_pressed(self, input_pin):
+        '''Removes dependencies and terminates the script'''
+        self.mic.say("2001 Quote")
+        GPIO.remove_event_detect(3)
+        GPIO.remove_event_detect(5)
+        sys.exit()
+
     def reset_pressed(self, input_pin):
+        '''Removes dependecies and restarts the script'''
         self.mic.say("Toby, I'm scared.")
+        GPIO.remove_event_detect(3)
+        GPIO.remove_event_detect(5)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def __init__(self, persona, mic, profile):
@@ -20,7 +30,9 @@ class Conversation(object):
         self.notifier = Notifier(profile)
         
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP) #Reset switch
+        GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP) #Off switch
+        GPIO.add_event_detect(3, GPIO.BOTH, callback=self.off_pressed)
         GPIO.add_event_detect(5, GPIO.BOTH, callback=self.reset_pressed)
 
     def handleForever(self):
