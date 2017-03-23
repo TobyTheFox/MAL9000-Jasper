@@ -5,6 +5,7 @@ import os
 import sys
 import shutil
 import logging
+import datetime
 
 import yaml
 import argparse
@@ -111,9 +112,14 @@ class Jasper(object):
 
     def run(self):
         if 'first_name' in self.config:
-            salutation = "Hello. My name is Mal. "
-            salutation += ("How can I be of service, %s?"
-                          % self.config["first_name"])
+            if datetime.datetime.now().hour < 12:
+                dayTime = "morning"
+            elif datetime.datetime.now().hour < 6:
+                dayTime = "afternoon"
+            else:
+                dayTime = "evening"
+                
+            salutation = ("Good %s %s I am the Mal 9000 Artificial Intellegence. You can call me Mal"  % (dayTime, self.config["first_name"]))
         else:
             salutation += "How can I be of service?"
         self.mic.say(salutation)
