@@ -137,22 +137,34 @@ if __name__ == "__main__":
     logging.basicConfig()
     logger = logging.getLogger()
     logger.getChild("client.stt").setLevel(logging.INFO)
-
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-
-    if not args.no_network_check and not diagnose.check_network_connection():
-        logger.warning("Network not connected. This may prevent Jasper from " +
-                       "running properly.")
-
-    if args.diagnose:
-        failed_checks = diagnose.run()
-        sys.exit(0 if not failed_checks else 1)
-
+    
     try:
-        app = Jasper()
-    except Exception:
-        logger.error("Error occured!", exc_info=True)
-        sys.exit(1)
+        #Start webcam recording
+        try:
+            os.system("sudo service motion start")
+            os.system("sudo motion")
+        except Exception:
+            logger.error("Error occured!", exc_info=True)
+            sys.exit(1)
 
-    app.run()
+        if args.debug:
+            logger.setLevel(logging.DEBUG)
+
+        if not args.no_network_check and not diagnose.check_network_connection():
+            logger.warning("Network not connected. This may prevent Jasper from " +
+            "running properly.")
+
+        if args.diagnose:
+            failed_checks = diagnose.run()
+            sys.exit(0 if not failed_checks else 1)
+
+        try:
+            app = Jasper()
+        except Exception:
+            logger.error("Error occured!", exc_info=True)
+            sys.exit(1)
+
+        app.run()
+    except:
+        print "YOU HAVE LEFT THE MAL 9000"
+        os.system("sudo service motion stop")
