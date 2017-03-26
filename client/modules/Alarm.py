@@ -31,7 +31,8 @@ class Alarm_Clock:
         def set_alarm(self, profile, mic):
                 try:
                         #TODO: Change to start 1 hour before the event
-                        wake_up_dt = datetime.datetime.strptime(Calendar.timeWakeUp(profile, mic), "%Y-%m-%dT%H:%M:%SZ")
+                        wake_up_time = Calendar.timeWakeUp(profile, mic)
+                        wake_up_dt = datetime.datetime.strptime(wake_up_time, "%Y-%m-%dT%H:%M:%SZ")
                         self.alarm_time = time.mktime(wake_up_dt.timetuple())
                         mic.say("I have set your alarm") 
                         return
