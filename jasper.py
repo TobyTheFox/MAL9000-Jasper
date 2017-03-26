@@ -119,7 +119,7 @@ class Jasper(object):
             else:
                 dayTime = "evening"
                 
-            salutation = ("Good %s %s I am the Mal 9000 Artificial Intellegence. You can call me Mal"  % (dayTime, self.config["first_name"]))
+            salutation = ("Good %s %s I am the mighty Artificial Intelligence 9000. You can call me Mal"  % (dayTime, self.config["first_name"]))
         else:
             salutation += "How can I be of service?"
         self.mic.say(salutation)

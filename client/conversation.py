@@ -12,7 +12,8 @@ class Conversation(object):
         self.mic.say("2001 Quote")
         GPIO.remove_event_detect(3)
         GPIO.remove_event_detect(5)
-        sys.exit()
+        os.system("sudo service motion stop")
+        raise SystemExit("Quit button pressed")
 
     def reset_pressed(self, input_pin):
         '''Removes dependecies and restarts the script'''
