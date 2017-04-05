@@ -167,4 +167,5 @@ if __name__ == "__main__":
         app.run()
     except:
         print "YOU HAVE LEFT THE MAL 9000"
+        app.mic.say(("%s I'm Scared" % app.config["first_name"]))
         os.system("sudo service motion stop")
