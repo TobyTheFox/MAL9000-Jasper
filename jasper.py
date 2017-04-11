@@ -16,6 +16,8 @@ from client import jasperpath
 from client import diagnose
 from client.conversation import Conversation
 
+import time
+
 # Add jasperpath.LIB_PATH to sys.path
 sys.path.append(jasperpath.LIB_PATH)
 
@@ -38,7 +40,7 @@ else:
 class Jasper(object):
     def __init__(self):
         self._logger = logging.getLogger(__name__)
-
+        
         # Create config dir if it does not exist yet
         if not os.path.exists(jasperpath.CONFIG_PATH):
             try:
@@ -104,7 +106,6 @@ class Jasper(object):
             logger.warning("tts_engine not specified in profile, defaulting " +
                            "to '%s'", tts_engine_slug)
         tts_engine_class = tts.get_engine_by_slug(tts_engine_slug)
-
         # Initialize Mic
         self.mic = Mic(tts_engine_class.get_instance(),
                        stt_passive_engine_class.get_passive_instance(),
@@ -141,23 +142,23 @@ if __name__ == "__main__":
     try:
         #Start webcam recording
         try:
-            os.system("sudo service motion start")
-            os.system("sudo motion")
+            #Removed due to high pitch sound TODO: Turn on without high pitch sound
+            #os.system("sudo service motion start")
+            #os.system("sudo motion")
+            pass
+
         except Exception:
             logger.error("Error occured!", exc_info=True)
             sys.exit(1)
-
         if args.debug:
             logger.setLevel(logging.DEBUG)
 
         if not args.no_network_check and not diagnose.check_network_connection():
             logger.warning("Network not connected. This may prevent Jasper from " +
             "running properly.")
-
         if args.diagnose:
             failed_checks = diagnose.run()
             sys.exit(0 if not failed_checks else 1)
-
         try:
             app = Jasper()
         except Exception:
